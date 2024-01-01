@@ -14,7 +14,6 @@
 Create
 <form action="/students" method="post">
     <input type="hidden" name="act" value="create">
-    <input type="text" name="id">
     <input type="text" name="name">
     <input type="text" name="score">
     <button>Save</button>

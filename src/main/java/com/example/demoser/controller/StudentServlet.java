@@ -11,9 +11,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 @WebServlet(name = "students", value = "/students")
 public class StudentServlet extends HttpServlet {
+    int recordsPerPage = 5;
     StudentService studentService = new StudentService();
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -36,9 +38,14 @@ public class StudentServlet extends HttpServlet {
 
     private void showList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher("student/list.jsp");
-        String key = request.getParameter("key");
-        if (key != null) {
-            request.setAttribute("ds", studentService.findAllName(key));
+            if (request.getParameter("page") != null) {
+            int currentPage = Integer.parseInt(request.getParameter("page"));
+            int totalRecords = studentService.findAll().size();
+            int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("ds", studentService.fetchDataFromDatabase(currentPage, recordsPerPage));
+        } else if (request.getParameter("key") != null) {
+//            request.setAttribute("ds", studentService.findAllName(key));
         } else {
             request.setAttribute("ds", studentService.findAll());
         }
@@ -47,8 +54,8 @@ public class StudentServlet extends HttpServlet {
 
     private void showFormEdit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         RequestDispatcher dispatcher = request.getRequestDispatcher("student/edit.jsp");
-        Student student = studentService.findById(Integer.parseInt(request.getParameter("id")));
-        request.setAttribute("s", student);
+//        Student student = studentService.findById(Integer.parseInt(request.getParameter("id")));
+//        request.setAttribute("s", student);
         dispatcher.forward(request, response);
     }
 
@@ -76,15 +83,14 @@ public class StudentServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         double score = Double.parseDouble(request.getParameter("score"));
         String name = request.getParameter("name");
-        studentService.edit(id, new Student(id, name, score));
+//        studentService.edit(id, new Student(id, name, score));
         response.sendRedirect("/students");
     }
 
     private void save(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
         double score = Double.parseDouble(request.getParameter("score"));
         String name = request.getParameter("name");
-        studentService.add(new Student(id, name, score));
+        studentService.add(new Student(name, score));
         response.sendRedirect("/students");
     }
 }
